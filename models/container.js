@@ -13,7 +13,7 @@ var ContainerSchema = new Schema({
     }]
 });
 
-ContainerSchema.prototype.appendMeasure = function (measure) {
+ContainerSchema.methods.appendMeasure = function (measure) {
     this.measures.append({
         timeStamp: new Date(),
         filling: measure // For the moment it will be only the filling measure
