@@ -5,9 +5,7 @@ const mongoose = require('mongoose');
 const app = express();
 
 // BODY PARSER SETUP ------
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(bodyParser.json());
 
 // ENABLING CORS
 app.use(function(req, res, next) {
