@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 var ContainerSchema = new Schema({
     id: Number,
     token: String,
+    last_seen: Date,
     address: {
         _id: false,
         lat: Number,
@@ -25,8 +26,11 @@ ContainerSchema.post('find', function (containers) {
 });
 
 ContainerSchema.methods.appendMeasure = function (measure) {
+    var today = new Date();
+
+    this.last_seen = today;
     this.measures.append({
-        timeStamp: new Date(),
+        timeStamp: today, //todo Hay que cambiar esto, debería de calcularse en función de las muestras que se reciban.
         filling: measure // For the moment it will be only the filling measure
     })
 };

@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const guid = require('./helpers/guid-generator');
 
 const app = express();
 
@@ -40,12 +41,13 @@ app.get('/containers', function (req, res) {
 });
 
 app.post('/containers', function (req, res) {
-
     var data = req.body;
+
+    var token = guid.generate();
 
     var container = new Container({
         id: data.id,
-        token: data.token,
+        token: token,
         address: {
             lat: data.lat,
             long: data.long
@@ -53,8 +55,11 @@ app.post('/containers', function (req, res) {
         filling: []
     });
     container.save();
+    console.log(token);
+    res.json({
+        token: token
+    });
 
-    res.sendStatus(200);
 });
 
 app.post('/containers/update/:container_id', function (req, res) {
