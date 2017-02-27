@@ -9,6 +9,13 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+// ENABLING CORS
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 // DATABASE SETUP ------
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/test');
@@ -41,8 +48,10 @@ app.post('/containers', function (req, res) {
     var container = new Container({
         id: data.id,
         token: data.token,
-        lat: data.lat,
-        long: data.long,
+        address: {
+            lat: data.lat,
+            long: data.long
+        },
         filling: []
     });
     container.save();
