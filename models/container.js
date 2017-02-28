@@ -12,7 +12,7 @@ var ContainerSchema = new Schema({
     },
     measures: [{
         _id: false,
-        timeStamp: Date,
+        timestamp: Date,
         filling: Number
     }]
 });
@@ -35,8 +35,8 @@ ContainerSchema.methods.appendMeasure = function (measure) {
     var today = new Date();
 
     this.last_seen = today;
-    this.measures.append({
-        timeStamp: today, //todo Hay que cambiar esto, debería de calcularse en función de las muestras que se reciban.
+    this.measures.push({
+        timestamp: today, //todo Hay que cambiar esto, debería de calcularse en función de las muestras que se reciban.
         filling: measure // For the moment it will be only the filling measure
     })
 };

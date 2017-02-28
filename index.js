@@ -56,7 +56,7 @@ app.post('/containers', function (req, res) {
             lat: data.lat,
             long: data.long
         },
-        filling: []
+        measures: []
     });
     container.save();
     console.log(token);
