@@ -25,6 +25,12 @@ ContainerSchema.post('find', function (containers) {
 
 });
 
+ContainerSchema.post('findOne', function (container) {
+
+    container.decideStatus();
+
+});
+
 ContainerSchema.methods.appendMeasure = function (measure) {
     var today = new Date();
 

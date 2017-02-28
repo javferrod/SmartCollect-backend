@@ -1,9 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+var path = require('path');
 const guid = require('./helpers/guid-generator');
 
 const app = express();
+
+//STATIC FILES ------
+app.use(express.static('app'));
 
 // BODY PARSER SETUP ------
 app.use(bodyParser.json());
@@ -27,7 +31,7 @@ app.listen(3000, function(){
 });
 
 app.get('/', function(req, res){
-	res.send('It is working :)');
+    res.sendFile(path.join(__dirname + '/app/index.html'));
 });
 
 app.get('/containers', function (req, res) {
@@ -62,22 +66,35 @@ app.post('/containers', function (req, res) {
 
 });
 
-app.post('/containers/update/:container_id', function (req, res) {
+app.post('/container/update/:container_id', function (req, res) {
     var containerId = req.params.container_id;
     var measures = req.body.measures;
 
-    Container.findOne({id: containerId}).then(function (container) {
+    Container.findOne({id: containerId})
+        .then(function (container) {
 
-        measures.forEach(function(measure){
-            container.appendMeasure(measure);
+            measures.forEach(function(measure){
+                container.appendMeasure(measure);
+            });
+
+            container.save();
+            res.sendStatus(200);
+        })
+        .catch(function (error) {
+            console.error(error);
+            res.sendStatus(404);
         });
+});
 
-        container.save();
+app.get('/container/:container_id', function (req, res) {
+    var containerId = req.params.container_id;
 
-        res.sendStatus(200);
-    }).catch(function (error) {
-        console.error(error);
-
-        res.sendStatus(404);
-    });
+    Container.findOne({id: containerId})
+        .then(function (container) {
+            res.json(container);
+        })
+        .catch(function (error) {
+           console.error(error);
+           res.sendStatus(404);
+        })
 });
