@@ -69,15 +69,14 @@ app.post('/containers', function (req, res) {
 app.post('/container/update/:container_id', function (req, res) {
     var containerId = req.params.container_id;
     var measures = req.body.measures;
+    var today = new Date();
 
     Container.findOne({id: containerId})
         .then(function (container) {
 
-            measures.forEach(function(measure){
-                container.appendMeasure(measure);
-            });
-
+            container.processMeasures(measures);
             container.save();
+
             res.sendStatus(200);
         })
         .catch(function (error) {
