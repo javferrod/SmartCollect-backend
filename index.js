@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 var path = require('path');
 const guid = require('./helpers/guid-generator');
 
+const distance = require('./helpers/distance');
+
 const app = express();
 
 //STATIC FILES ------
@@ -49,6 +51,8 @@ app.post('/containers', function (req, res) {
 
     var token = guid.generate();
 
+
+
     var container = new Container({
         id: data.id,
         token: token,
@@ -58,13 +62,52 @@ app.post('/containers', function (req, res) {
         },
         measures: []
     });
-    container.save();
-    console.log(token);
-    res.json({
-        token: token
+
+    Container.find().then(function (containers) {
+
+        if(containers.length !== 0){
+
+            distance.setDistances(container, containers).then(function(container){
+                console.log(container);
+                container.save();
+
+
+                res.json({
+                    token: token
+                });
+            });
+        }
+        else{
+            container.save();
+
+            res.json({
+                token: token
+            });
+        }
+
+
     });
 
+
+
+
+
+
 });
+
+
+app.get('/test', function () {
+distance.get(
+{
+  origins: ['san francisco, ca','san diego, ca'],
+  destinations: ['san diego, ca','seattle, wa']
+},
+function(err, data) {
+  if (err) return console.log(err);
+  console.log(data);
+});
+});
+
 
 app.post('/container/update/:container_id', function (req, res) {
     var containerId = req.params.container_id;

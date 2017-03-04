@@ -12,13 +12,24 @@ var ContainerSchema = new Schema({
     address: {
         _id: false,
         lat: Number,
-        long: Number
+        long: Number,
+        friendlyName: String
     },
     measures: [{
         _id: false,
         timestamp: Date,
         filling: Number
-    }]
+    }],
+    distances: [
+        {
+            _id: false,
+            _container: { type: mongoose.Schema.Types.ObjectId, ref: 'Container' },
+            distance: Number,
+            friendlyDistance: String,
+            duration: Number,
+            friendlyDuration: String
+        }
+    ]
 });
 
 ContainerSchema.post('find', function (containers) {
@@ -35,6 +46,11 @@ ContainerSchema.post('findOne', function (container) {
 
 });
 
+
+ContainerSchema.methods.getLatLng = function(){
+    return this.address.lat + ', ' + this.address.long
+};
+
 ContainerSchema.methods.processMeasures = function(measures){
     var today = new Date();
     this.last_seen = today;
@@ -46,6 +62,7 @@ ContainerSchema.methods.processMeasures = function(measures){
         this.appendMeasure(measure.filling, timestamp);
     }.bind(this));
 };
+
 
 ContainerSchema.methods.appendMeasure = function(filling, timestamp) {
 
