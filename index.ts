@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-var path = require('path');
+const path = require('path');
 const guid = require('./helpers/guid-generator');
 
 const distance = require('./helpers/distance');
@@ -27,7 +27,6 @@ mongoose.connect('mongodb://localhost/test');
 
 const Container = require('./models/container');
 
-
 app.listen(3000, function(){
 	console.log('Listening on 3000');
 });
@@ -47,13 +46,10 @@ app.get('/containers', function (req, res) {
 });
 
 app.post('/containers', function (req, res) {
-    var data = req.body;
+    let data = req.body;
+    let token = guid.generate();
 
-    var token = guid.generate();
-
-
-
-    var container = new Container({
+    let container = new Container({
         id: data.id,
         token: token,
         address: {
@@ -68,9 +64,7 @@ app.post('/containers', function (req, res) {
         if(containers.length !== 0){
 
             distance.setDistances(container, containers).then(function(container){
-                console.log(container);
                 container.save();
-
 
                 res.json({
                     token: token
@@ -84,35 +78,13 @@ app.post('/containers', function (req, res) {
                 token: token
             });
         }
-
-
     });
 
-
-
-
-
-
 });
-
-
-app.get('/test', function () {
-distance.get(
-{
-  origins: ['san francisco, ca','san diego, ca'],
-  destinations: ['san diego, ca','seattle, wa']
-},
-function(err, data) {
-  if (err) return console.log(err);
-  console.log(data);
-});
-});
-
 
 app.post('/container/update/:container_id', function (req, res) {
-    var containerId = req.params.container_id;
-    var measures = req.body.measures;
-    var today = new Date();
+    let containerId = req.params.container_id;
+    let measures = req.body.measures;
 
     Container.findOne({id: containerId})
         .then(function (container) {
@@ -129,7 +101,7 @@ app.post('/container/update/:container_id', function (req, res) {
 });
 
 app.get('/container/:container_id', function (req, res) {
-    var containerId = req.params.container_id;
+    let containerId = req.params.container_id;
 
     Container.findOne({id: containerId})
         .then(function (container) {

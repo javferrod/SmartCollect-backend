@@ -1,11 +1,11 @@
-SAMPLES_PER_CONECTION = 24;
+let SAMPLES_PER_CONECTION = 24;
 
-var mongoose = require('mongoose');
-var dateHelper = require('../helpers/dates');
+const mongoose = require('mongoose');
+const dateHelper = require('../helpers/dates');
 
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-var ContainerSchema = new Schema({
+const ContainerSchema = new Schema({
     id: Number,
     token: String,
     last_seen: Date,
@@ -46,18 +46,26 @@ ContainerSchema.post('findOne', function (container) {
 
 });
 
+ContainerSchema.methods.timeTo = function (destination) {
+
+    let route = this.distances.find(function(address){
+        return address._container === destination._id;
+    });
+
+    return route.duration;
+};
 
 ContainerSchema.methods.getLatLng = function(){
     return this.address.lat + ', ' + this.address.long
 };
 
 ContainerSchema.methods.processMeasures = function(measures){
-    var today = new Date();
+    let today = new Date();
     this.last_seen = today;
 
     measures.forEach(function(measure){
-        var hoursSinceMeasure = SAMPLES_PER_CONECTION - measure.index;
-        var timestamp = dateHelper.substractHours(today, hoursSinceMeasure);
+        let hoursSinceMeasure = SAMPLES_PER_CONECTION - measure.index;
+        let timestamp = dateHelper.substractHours(today, hoursSinceMeasure);
 
         this.appendMeasure(measure.filling, timestamp);
     }.bind(this));
@@ -74,7 +82,7 @@ ContainerSchema.methods.appendMeasure = function(filling, timestamp) {
 
 ContainerSchema.methods.decideStatus = function () {
 
-    var isDisconnected = this.measures.length === 0;
+    let isDisconnected = this.measures.length === 0;
 
     if(isDisconnected)
         this._doc.status = 'disconnected';
@@ -84,8 +92,8 @@ ContainerSchema.methods.decideStatus = function () {
 
 //TODO mejorar esta comprobación de "salud" del contenedor
 ContainerSchema.methods.decideIfFailureOrSuccess = function () {
-   var today = new Date();
-   var days = dateHelper.daysBetween(this.last_seen, today);
+   let today = new Date();
+   let days = dateHelper.daysBetween(this.last_seen, today);
 
    if(days <= 2)
        this._doc.status = 'success';
