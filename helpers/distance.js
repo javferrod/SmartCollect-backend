@@ -48,7 +48,7 @@ var distance = {
 
 function insertOneAddressOnEachContainer(containers, address) {
     return containers.map(function(container, index){
-        container.distances.push(address.distances[index]);
+        container.routes.push(address.distances[index]);
         return container;
     });
 }
@@ -105,7 +105,7 @@ function parseResponse(response, containers) {
 function setAddressAndOrigin(addressAndOrigin, container){
 
     container.address.friendlyName = addressAndOrigin.originAddress;
-    container.distances = addressAndOrigin.distances;
+    container.routes = addressAndOrigin.distances;
 
     return container;
 }

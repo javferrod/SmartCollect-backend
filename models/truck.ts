@@ -1,4 +1,4 @@
-const Container = require('./container');
+const Container = require('./GraphNode');
 
 export class Truck {
     currentTime: number;

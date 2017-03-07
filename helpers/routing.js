@@ -6,7 +6,7 @@ var routing = {
 
     generateOneRoute: function(containers){
 
-        var origin = depot; //conseguirDepot
+        var origin = getDepot(); //conseguirDepot
         var truck = new Truck(); //init truck
 
         while(! truck.finished()){
@@ -41,6 +41,12 @@ function chooseNextContainer(containers, truck, depot) {
            if(timeToOption < timeToBestOption)
                return timeToBestOption;
        })
+}
+
+function getDepot() {
+    GraphNode.findOne({type: 'depot'}).then(function (depot) {
+       return depot;
+    })
 }
 
 

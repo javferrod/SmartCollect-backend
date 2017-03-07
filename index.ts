@@ -25,7 +25,7 @@ app.use(function(req, res, next) {
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/test');
 
-const Container = require('./models/container');
+const GraphNode = require('./models/GraphNode');
 
 app.listen(3000, function(){
 	console.log('Listening on 3000');
@@ -37,7 +37,7 @@ app.get('/', function(req, res){
 
 app.get('/containers', function (req, res) {
 
-    Container.find().then(function (containers) {
+    GraphNode.find({type: 'container'}).then(function (containers) {
         res.json(containers);
     }).catch(function (error) {
         console.error(error)
@@ -49,18 +49,20 @@ app.post('/containers', function (req, res) {
     let data = req.body;
     let token = guid.generate();
 
-    let container = new Container({
+    let container = new GraphNode({
         id: data.id,
         token: token,
+        type: 'container',
         address: {
             lat: data.lat,
             long: data.long
         },
-        measures: []
+        measures: [],
+        routes: []
     });
 
-    Container.find().then(function (containers) {
-
+    GraphNode.find().then(function (containers) {
+        console.log(containers);
         if(containers.length !== 0){
 
             distance.setDistances(container, containers).then(function(container){
@@ -86,7 +88,7 @@ app.post('/container/update/:container_id', function (req, res) {
     let containerId = req.params.container_id;
     let measures = req.body.measures;
 
-    Container.findOne({id: containerId})
+    GraphNode.findOne({id: containerId})
         .then(function (container) {
 
             container.processMeasures(measures);
@@ -103,7 +105,7 @@ app.post('/container/update/:container_id', function (req, res) {
 app.get('/container/:container_id', function (req, res) {
     let containerId = req.params.container_id;
 
-    Container.findOne({id: containerId})
+    GraphNode.findOne({id: containerId})
         .then(function (container) {
             res.json(container);
         })

@@ -1,14 +1,15 @@
-let SAMPLES_PER_CONECTION = 24;
+SAMPLES_PER_CONECTION = 24;
 
 const mongoose = require('mongoose');
 const dateHelper = require('../helpers/dates');
 
 const Schema = mongoose.Schema;
 
-const ContainerSchema = new Schema({
+const GraphNodeSchema = new Schema({
     id: Number,
     token: String,
     last_seen: Date,
+    type: String,
     address: {
         _id: false,
         lat: Number,
@@ -20,7 +21,7 @@ const ContainerSchema = new Schema({
         timestamp: Date,
         filling: Number
     }],
-    distances: [
+    routes: [
         {
             _id: false,
             _container: { type: mongoose.Schema.Types.ObjectId, ref: 'Container' },
@@ -32,47 +33,33 @@ const ContainerSchema = new Schema({
     ]
 });
 
-ContainerSchema.post('find', function (containers) {
+GraphNodeSchema.methods.timeTo = function (destination) {
 
-    containers.map(function (container) {
-        container.decideStatus();
-    });
-
-});
-
-ContainerSchema.post('findOne', function (container) {
-
-    container.decideStatus();
-
-});
-
-ContainerSchema.methods.timeTo = function (destination) {
-
-    let route = this.distances.find(function(address){
+    var route = this.distances.find(function(address){
         return address._container === destination._id;
     });
 
     return route.duration;
 };
 
-ContainerSchema.methods.getLatLng = function(){
+GraphNodeSchema.methods.getLatLng = function(){
     return this.address.lat + ', ' + this.address.long
 };
 
-ContainerSchema.methods.processMeasures = function(measures){
-    let today = new Date();
+GraphNodeSchema.methods.processMeasures = function(measures){
+    var today = new Date();
     this.last_seen = today;
 
     measures.forEach(function(measure){
-        let hoursSinceMeasure = SAMPLES_PER_CONECTION - measure.index;
-        let timestamp = dateHelper.substractHours(today, hoursSinceMeasure);
+        var hoursSinceMeasure = SAMPLES_PER_CONECTION - measure.index;
+        var timestamp = dateHelper.substractHours(today, hoursSinceMeasure);
 
         this.appendMeasure(measure.filling, timestamp);
     }.bind(this));
 };
 
 
-ContainerSchema.methods.appendMeasure = function(filling, timestamp) {
+GraphNodeSchema.methods.appendMeasure = function(filling, timestamp) {
 
     this.measures.push({
         timestamp: timestamp,
@@ -80,9 +67,11 @@ ContainerSchema.methods.appendMeasure = function(filling, timestamp) {
     })
 };
 
-ContainerSchema.methods.decideStatus = function () {
 
-    let isDisconnected = this.measures.length === 0;
+//TODO esto va para angular
+GraphNodeSchema.methods.decideStatus = function () {
+
+    var isDisconnected = this.measures.length === 0;
 
     if(isDisconnected)
         this._doc.status = 'disconnected';
@@ -91,9 +80,9 @@ ContainerSchema.methods.decideStatus = function () {
 };
 
 //TODO mejorar esta comprobación de "salud" del contenedor
-ContainerSchema.methods.decideIfFailureOrSuccess = function () {
-   let today = new Date();
-   let days = dateHelper.daysBetween(this.last_seen, today);
+GraphNodeSchema.methods.decideIfFailureOrSuccess = function () {
+   var today = new Date();
+   var days = dateHelper.daysBetween(this.last_seen, today);
 
    if(days <= 2)
        this._doc.status = 'success';
@@ -102,4 +91,4 @@ ContainerSchema.methods.decideIfFailureOrSuccess = function () {
 };
 
 
-module.exports = mongoose.model('Container', ContainerSchema);
+module.exports = mongoose.model('GraphNode', GraphNodeSchema);
