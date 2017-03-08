@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build:live",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node --debug=6000 ./index.ts",
+    "debug": "node $npm_package_config_nodemon --debug=6000 ./index.ts"
   },
   "author": "Javier Fernández Rodríguez",
   "license": "ISC",

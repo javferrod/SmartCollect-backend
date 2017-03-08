@@ -35,9 +35,17 @@ const GraphNodeSchema = new Schema({
 
 GraphNodeSchema.methods.timeTo = function (destination) {
 
-    var route = this.distances.find(function(address){
-        return address._container === destination._id;
+    var route = this.routes.find(function(address){
+        if(address === undefined)
+            console.log(container);
+
+        return address._container.equals(destination._id);
     });
+
+    if(route === undefined){
+        console.log(destination);
+        console.log(this.routes)
+    }
 
     return route.duration;
 };
@@ -67,7 +75,9 @@ GraphNodeSchema.methods.appendMeasure = function(filling, timestamp) {
     })
 };
 
-
+GraphNodeSchema.methods.getLoad = function () {
+    return 10; //TODO implementar
+};
 //TODO esto va para angular
 GraphNodeSchema.methods.decideStatus = function () {
 

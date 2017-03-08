@@ -1,4 +1,7 @@
-const Container = require('./GraphNode');
+const GraphNode = require('./GraphNode');
+
+const CAPACITY_THRESHOLD = 0.8;
+const MAX_WORK_TIME = 60 * 60;
 
 export class Truck {
     currentTime: number;
@@ -12,9 +15,22 @@ export class Truck {
     //ROUTES
     routes: any[];
 
+    constructor(){
+       this.routes = [];
+       this.currentLoad = 0;
+       this.currentTime = 0;
+       this.collectionTime = 30;
+        this.emptyingTime = 30;
+        this.maxCapacity = 100;
+    }
+
     timeTo(destination){
         let actualPosition = this.getActualPosition();
         return actualPosition.timeTo(destination);
+    }
+
+    setOrigin(depot){
+        this.routes.push(depot);
     }
 
     attachDestination(destination){
@@ -26,6 +42,14 @@ export class Truck {
         this.updateLoad(destination);
 
         //TODO faltaría aumentar el límite diario del camion, pero eso se puede comprobar con el currentTime
+    }
+
+    finished(){
+        return this.currentTime > MAX_WORK_TIME;
+    }
+
+    runOutOfCapacity(){
+        return (this.currentLoad / this.maxCapacity) > CAPACITY_THRESHOLD
     }
 
     // Creo que esto no va a ser necesario
@@ -40,10 +64,10 @@ export class Truck {
         return this.maxCapacity > this.currentLoad + destination.getLoad();
     }
 
-    willBeEnoughTimeToReturnToDepot(destination, depot){
+    willBeEnoughTimeToReturnToDepot(destination, depot, disposals){
 
         let actualPosition = this.getActualPosition();
-        let nearestDisposal = actualPosition.getNearestDisposal();
+        let nearestDisposal = this.getNearestDisposal(disposals);
 
         //Time necesary to recollect destination from origin
         let recollectionTime = actualPosition.timeTo(destination) + this.collectionTime;
@@ -57,7 +81,16 @@ export class Truck {
         //Total
         let futureTime = this.currentTime + recollectionTime + emptyingTime + timeToDepot;
 
-        return (futureTime <= depot.closeTime)
+        return (futureTime <= 2000)
+    }
+
+    getNearestDisposal(disposals){
+        return disposals.reduce(function (bestOption, option) {
+            let timeToBestOption = this.timeTo(bestOption); //TODO cachear esto para más rapidez
+            let timeToOption = this.timeTo(option);
+            if (timeToOption < timeToBestOption)
+                return timeToBestOption;
+        })
     }
 
     private updateLoad(destination){

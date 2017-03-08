@@ -1,3 +1,4 @@
+import {Routing} from "./helpers/routing";
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -37,7 +38,7 @@ app.get('/', function(req, res){
 
 app.get('/containers', function (req, res) {
 
-    GraphNode.find({type: 'container'}).then(function (containers) {
+    GraphNode.find().then(function (containers) {
         res.json(containers);
     }).catch(function (error) {
         console.error(error)
@@ -49,39 +50,11 @@ app.post('/containers', function (req, res) {
     let data = req.body;
     let token = guid.generate();
 
-    let container = new GraphNode({
-        id: data.id,
+    insertNode(data.id, data.lat, data.long, token, 'container');
+
+    res.json({
         token: token,
-        type: 'container',
-        address: {
-            lat: data.lat,
-            long: data.long
-        },
-        measures: [],
-        routes: []
     });
-
-    GraphNode.find().then(function (containers) {
-        console.log(containers);
-        if(containers.length !== 0){
-
-            distance.setDistances(container, containers).then(function(container){
-                container.save();
-
-                res.json({
-                    token: token
-                });
-            });
-        }
-        else{
-            container.save();
-
-            res.json({
-                token: token
-            });
-        }
-    });
-
 });
 
 app.post('/container/update/:container_id', function (req, res) {
@@ -114,3 +87,45 @@ app.get('/container/:container_id', function (req, res) {
            res.sendStatus(404);
         })
 });
+
+app.get('/generate_routes', function (req, res) {
+    GraphNode.find({type: 'container'}).then(function (containers) {
+        return Routing.generateInitialSolution(containers);
+    }).then(function (trucks) {
+        res.json(trucks);
+    });
+});
+
+app.get('/disposal', function (req, res) {
+    insertNode(666, 42.229021, -8.719507, 11, 'disposal');
+});
+
+app.get('/depot', function (req, res) {
+    insertNode(666,42.231627 ,-8.720580, 11, 'depot');
+});
+function insertNode(id, lat, lng, token, type){
+
+    let newNode = new GraphNode({
+        id: id,
+        token: token,
+        type: type,
+        address: {
+            lat: lat,
+            long: lng
+        },
+        measures: [],
+        routes: []
+    });
+
+    return GraphNode.find()
+        .then(function (nodes) {
+            if(nodes.length !== 0)
+                return distance.setDistances(newNode, nodes);
+            else
+                return newNode;
+        })
+        .then(function (newNode) {
+            newNode.save();
+            return newNode;
+        });
+}
