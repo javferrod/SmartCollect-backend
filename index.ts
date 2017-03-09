@@ -46,10 +46,13 @@ app.use('/node', require('./controllers/nodes.controller'));
 
 app.use('/route', require('./controllers/routes.controller'));
 
+// DISPOSAL ---
+
+app.use('/disposal', require('./controllers/disposals.controller'));
 
 // HACKS ---
 
-app.get('/disposal', function (req, res) {
+app.get('/fake_disposal', function (req, res) {
     Graph.insertNode(666, 42.229021, -8.719507, 11, 'disposal');
 });
 

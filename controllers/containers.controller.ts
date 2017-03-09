@@ -4,7 +4,6 @@ const GraphNode = require('../models/GraphNode');
 const guid = require('../helpers/guid-generator');
 
 router.get('/', function (req, res) {
-
     GraphNode.find({type: 'container'}).then(function (containers) {
         res.json(containers);
     }).catch(function (error) {
@@ -17,11 +16,11 @@ router.post('/', function (req, res) {
     let data = req.body;
     let token = guid.generate();
 
-    Graph.insertNode(data.id, data.lat, data.long, token, 'container');
+    Graph.insertNode(data.id, data.lat, data.long, token, 'container')
+        .then(function () {
+            res.json({token: token});
+        });
 
-    res.json({
-        token: token,
-    });
 });
 
 router.post('/update/:container_id', function (req, res) {
