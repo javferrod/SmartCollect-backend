@@ -78,27 +78,6 @@ GraphNodeSchema.methods.appendMeasure = function(filling, timestamp) {
 GraphNodeSchema.methods.getLoad = function () {
     return 10; //TODO implementar
 };
-//TODO esto va para angular
-GraphNodeSchema.methods.decideStatus = function () {
-
-    var isDisconnected = this.measures.length === 0;
-
-    if(isDisconnected)
-        this._doc.status = 'disconnected';
-    else
-        this.decideIfFailureOrSuccess();
-};
-
-//TODO mejorar esta comprobación de "salud" del contenedor
-GraphNodeSchema.methods.decideIfFailureOrSuccess = function () {
-   var today = new Date();
-   var days = dateHelper.daysBetween(this.last_seen, today);
-
-   if(days <= 2)
-       this._doc.status = 'success';
-   else
-      this._doc.status = 'failure'
-};
 
 
 module.exports = mongoose.model('GraphNode', GraphNodeSchema);
