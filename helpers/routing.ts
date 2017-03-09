@@ -41,10 +41,18 @@ export class Routing {
 
             if(truck.runOutOfCapacity())
                 nextDestination = truck.getNearestDisposal(disposals);
-            else{
+            else {
                 nextDestination = Routing.chooseNextContainer(containers, truck, depot, disposals);
                 Routing.removeFromContainersList(containers, nextDestination); //check if disposal. If disposal, do nothing
             }
+
+
+            /*
+            * If we receive a null, it means that there aren't
+            * more feasible containers to collect, so we close the route
+            */
+            if(nextDestination === null)
+                return truck;
 
             truck.attachDestination(nextDestination);
         }
@@ -53,24 +61,36 @@ export class Routing {
     }
 
     private static chooseNextContainer(containers, truck, depot, disposals) {
-        return containers
-            .filter(function (option) {
-                let collectible = truck.isCollectible(option);
-                let time = truck.willBeEnoughTimeToReturnToDepot(option, depot, disposals);
-                console.log(collectible, time);
-                return collectible && time;
-            })
-            .reduce(function (bestOption, option) {
-                console.log(bestOption);
-                console.log(truck);
-                let timeToBestOption = truck.timeTo(bestOption); //TODO cachear esto para más rapidez
-                let timeToOption = truck.timeTo(option);
+        let feasibleContainers = Routing.getFeasibleContainers(containers, truck, depot, disposals);
 
-                if(timeToOption < timeToBestOption)
-                    return option;
-                else
-                    return bestOption
-            })
+        if(feasibleContainers.length === 0)
+            return null;
+        else
+            return Routing.getBestContainer(feasibleContainers, truck);
+    }
+
+    private static getFeasibleContainers(containers, truck, depot, disposals){
+        return containers.filter(function (option) {
+            let collectible = truck.isCollectible(option);
+            let time = truck.willBeEnoughTimeToReturnToDepot(option, depot, disposals);
+            console.log(collectible, time);
+            return collectible && time;
+        });
+    }
+
+    private static getBestContainer(containers, truck){
+        //TODO cachear timeToBestOption para más rapidez
+        containers.reduce(function (bestOption, option) {
+            console.log(bestOption);
+            console.log(truck);
+            let timeToBestOption = truck.timeTo(bestOption);
+            let timeToOption = truck.timeTo(option);
+
+            if(timeToOption < timeToBestOption)
+                return option;
+            else
+                return bestOption
+        })
     }
 
     private static getDepot() {
