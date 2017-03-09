@@ -42,11 +42,6 @@ GraphNodeSchema.methods.timeTo = function (destination) {
         return address._container.equals(destination._id);
     });
 
-    if(route === undefined){
-        console.log(destination);
-        console.log(this.routes)
-    }
-
     return route.duration;
 };
 

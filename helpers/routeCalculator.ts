@@ -15,7 +15,6 @@ export class Routing {
             })
             .then(function (resul) {
                 disposals = resul;
-                console.log('papap1');
                 return disposals
 
             })
@@ -45,7 +44,6 @@ export class Routing {
                 Routing.removeFromContainersList(containers, nextDestination); //check if disposal. If disposal, do nothing
             }
 
-
             /*
             * If we receive a null, it means that there aren't
             * more feasible containers to collect, so we close the route
@@ -54,6 +52,8 @@ export class Routing {
                 return truck;
 
             truck.attachDestination(nextDestination);
+
+            console.log(truck);
         }
 
         return truck;
@@ -72,16 +72,13 @@ export class Routing {
         return containers.filter(function (option) {
             let collectible = truck.isCollectible(option);
             let time = truck.willBeEnoughTimeToReturnToDepot(option, depot, disposals);
-            console.log(collectible, time);
             return collectible && time;
         });
     }
 
     private static getBestContainer(containers, truck){
         //TODO cachear timeToBestOption para más rapidez
-        containers.reduce(function (bestOption, option) {
-            console.log(bestOption);
-            console.log(truck);
+        return containers.reduce(function (bestOption, option) {
             let timeToBestOption = truck.timeTo(bestOption);
             let timeToOption = truck.timeTo(option);
 
