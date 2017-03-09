@@ -1,6 +1,5 @@
 //TODO: En progreso
 import {Truck} from "../models/truck";
-
 const GraphNode = require('./../models/GraphNode');
 
 export class Routing {
