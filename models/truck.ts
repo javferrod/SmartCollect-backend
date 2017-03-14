@@ -1,7 +1,8 @@
 const GraphNode = require('./GraphNode');
+const Route = require('./Route');
 
 const CAPACITY_THRESHOLD = 0.8;
-const MAX_WORK_TIME = 60 * 60;
+const MAX_WORK_TIME = 10*60 * 60;
 
 export class Truck {
     currentTime: number;
@@ -21,7 +22,23 @@ export class Truck {
        this.currentTime = 0;
        this.collectionTime = 30;
         this.emptyingTime = 30;
-        this.maxCapacity = 100;
+        this.maxCapacity = 1000;
+    }
+
+    saveRoute(){
+
+        let route = new Route({nodes: []});
+
+        this.routes.forEach(function (node, index) {
+            console.log(index);
+            route.nodes.push({
+                _graphNode: node,
+                order: index,
+            });
+
+        });
+
+        route.save();
     }
 
     timeTo(destination){
@@ -81,7 +98,7 @@ export class Truck {
         //Total
         let futureTime = this.currentTime + recollectionTime + emptyingTime + timeToDepot;
 
-        return (futureTime <= 2000)
+        return (futureTime <= 500000)
     }
 
     getNearestDisposal(disposals){

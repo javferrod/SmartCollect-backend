@@ -53,7 +53,6 @@ export class Routing {
 
             truck.attachDestination(nextDestination);
 
-            console.log(truck);
         }
 
         return truck;

@@ -24,7 +24,7 @@ const GraphNodeSchema = new Schema({
     routes: [
         {
             _id: false,
-            _container: { type: mongoose.Schema.Types.ObjectId, ref: 'Container' },
+            _container: { type: mongoose.Schema.Types.ObjectId, ref: 'GraphNode' },
             distance: Number,
             friendlyDistance: String,
             duration: Number,
