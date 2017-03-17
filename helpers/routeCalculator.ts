@@ -48,13 +48,16 @@ export class Routing {
             * If we receive a null, it means that there aren't
             * more feasible containers to collect, so we close the route
             */
-            if(nextDestination === null)
+            if(nextDestination === null){
+                Routing.attachDepot(truck, depot, disposals);
                 return truck;
+            }
 
             truck.attachDestination(nextDestination);
 
         }
 
+        Routing.attachDepot(truck, depot, disposals);
         return truck;
     }
 
@@ -75,7 +78,7 @@ export class Routing {
         });
     }
 
-    private static getBestContainer(containers, truck){
+    static getBestContainer(containers, truck){
         //TODO cachear timeToBestOption para más rapidez
         return containers.reduce(function (bestOption, option) {
             let timeToBestOption = truck.timeTo(bestOption);
@@ -86,6 +89,16 @@ export class Routing {
             else
                 return bestOption
         })
+    }
+
+    private static attachDepot(truck, depot, disposals){
+        if(truck.currentLoad != 0){
+           let disposal = truck.getNearestDisposal(disposals);
+           truck.attachDestination(disposal);
+        }
+
+        truck.attachDestination(depot);
+        return truck;
     }
 
     private static getDepot() {
@@ -99,6 +112,7 @@ export class Routing {
             return disposals;
         })
     }
+
 
     private static removeFromContainersList(list, itemToRemove){
         let index = list.indexOf(itemToRemove);

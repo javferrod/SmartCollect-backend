@@ -1,3 +1,5 @@
+import {Routing} from "../helpers/routeCalculator";
+import {cursorTo} from "readline";
 const GraphNode = require('./GraphNode');
 const Route = require('./Route');
 
@@ -21,8 +23,8 @@ export class Truck {
        this.currentLoad = 0;
        this.currentTime = 0;
        this.collectionTime = 30;
-        this.emptyingTime = 30;
-        this.maxCapacity = 1000;
+       this.emptyingTime = 30;
+       this.maxCapacity = 1000;
     }
 
     saveRoute(){
@@ -30,7 +32,6 @@ export class Truck {
         let route = new Route({nodes: []});
 
         this.routes.forEach(function (node, index) {
-            console.log(index);
             route.nodes.push({
                 _graphNode: node,
                 order: index,
@@ -39,6 +40,48 @@ export class Truck {
         });
 
         route.save();
+    }
+
+    isBetterThan(anotherTruck){
+        return this.currentTime < anotherTruck.currentTime;
+    }
+
+    isFeasible(disposals){
+        // Realizamos una copia del camión actual
+        let truck = new Truck();
+        let pendingNodes = this.routes.slice();
+
+        let origin = pendingNodes.unshift();
+        truck.setOrigin(origin);
+
+        pendingNodes.forEach(function (element, index) {
+
+            if(!truck.isCollectible(element)){
+                let nearestDisposal = truck.getNearestDisposal(disposals);
+                truck.attachDestination(nearestDisposal);
+            }
+
+            truck.attachDestination(element);
+
+            /*
+            /* Si se ha cumplido el tiempo de trabajo y no se
+            /* han acabado con la ruta, esta ruta no es posible
+            */
+
+            if(truck.finished() && index != (pendingNodes.length -1 ))
+                return false;
+        });
+
+        // Actualizamos el currentTime
+        this.currentTime = truck.currentTime;
+        return true;
+    }
+
+    moveAfter(container1, container2){
+        this.removeFromRoutes(container1);
+        let index2 = this.routes.indexOf(container2);
+
+        this.routes.splice(index2 + 1, 0, container1);
     }
 
     timeTo(destination){
@@ -69,13 +112,6 @@ export class Truck {
         return (this.currentLoad / this.maxCapacity) > CAPACITY_THRESHOLD
     }
 
-    // Creo que esto no va a ser necesario
-    isVisitable(destination){
-        let actualPosition = this.getActualPosition();
-        let arrivalTime = actualPosition.timeTo(destination) + this.currentTime;
-
-        return (arrivalTime > destination.openTime && arrivalTime < destination.closeTime);
-    }
 
     isCollectible(destination){
         return this.maxCapacity > this.currentLoad + destination.getLoad();
@@ -98,22 +134,38 @@ export class Truck {
         //Total
         let futureTime = this.currentTime + recollectionTime + emptyingTime + timeToDepot;
 
-        return (futureTime <= 500000)
+        return (futureTime <= MAX_WORK_TIME)
     }
 
     getNearestDisposal(disposals){
-        return disposals.reduce(function (bestOption, option) {
-            let timeToBestOption = this.timeTo(bestOption); //TODO cachear esto para más rapidez
-            let timeToOption = this.timeTo(option);
-            if (timeToOption < timeToBestOption)
-                return timeToBestOption;
+
+        if(disposals.length === 1)
+            return disposals[0];
+
+        return disposals.reduce(function (bestoption, option) {
+            let timetobestoption = this.timeto(bestoption); //todo cachear esto para más rapidez
+            let timetooption = this.timeto(option);
+            if (timetooption < timetobestoption)
+                return timetobestoption;
         })
+    }
+
+    copy(){
+        let truck = new Truck();
+        truck.routes = this.routes.slice();
+
+        return truck;
+    }
+
+    private removeFromRoutes(container){
+        let index = this.routes.indexOf(container);
+        this.routes.splice(index, 1);
     }
 
     private updateLoad(destination){
         if(destination.type === 'disposal')
             this.currentLoad = 0;
-        else
+        else if(destination.type === 'container')
             this.currentLoad += destination.getLoad();
     }
 

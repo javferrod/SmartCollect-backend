@@ -6,12 +6,14 @@
   "scripts": {
     "start": "npm run build:live",
     "build:live": "nodemon --exec ./node_modules/.bin/ts-node --debug=6000 ./index.ts",
-    "debug": "node $npm_package_config_nodemon --debug=6000 ./index.ts"
+    "debug": "node $npm_package_config_nodemon --debug=6000 ./index.ts",
+    "test": "mocha --opts mocha.opts"
   },
   "author": "Javier Fernández Rodríguez",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.16.1",
+    "chai": "^3.5.0",
     "express": "^4.15.2",
     "google-distance": "^1.0.1",
     "mongodb": "^2.2.24",
@@ -19,8 +21,11 @@
     "nodemon": "^1.11.0"
   },
   "devDependencies": {
+    "@types/mocha": "^2.2.40",
     "@types/node": "^7.0.5",
+    "mocha": "^3.2.0",
     "nodemon": "^1.11.0",
+    "ts-mocha": "^1.0.3",
     "ts-node": "^2.1.0",
     "typescript": "^2.2.1"
   }

@@ -10,7 +10,6 @@ router.get('/', function (req, res) {
        .populate('nodes._graphNode')
        .exec()
        .then(function(nodes){
-           console.log(nodes[0].nodes.length);
            return res.json(nodes);
        })
        .catch(function (err) {
