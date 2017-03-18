@@ -107,7 +107,7 @@ export class Routing {
         })
     }
 
-    private static getDisposals(){
+    static getDisposals(){
         return GraphNode.find({type: 'disposal'}).then(function (disposals) {
             return disposals;
         })

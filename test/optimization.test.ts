@@ -1,5 +1,8 @@
 import {Truck} from "../models/truck";
 import { expect } from 'chai';
+import {Routing} from "../helpers/routeCalculator";
+
+const GraphNode = require('../models/GraphNode');
 
 describe("Funciones de la clase Truck", function() {
   describe("Insertar un nodo despues de otro", function() {
@@ -21,8 +24,8 @@ describe("Funciones de la clase Truck", function() {
     });
   });
 
-  describe("Hex to RGB conversion", function() {
-    it("converts the basic colors", function() {
+  describe("Validar una ruta", function() {
+    it("valida una ruta que ya de por si debería de ser válida", function() {
 
     });
   });

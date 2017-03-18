@@ -51,7 +51,7 @@ export class Truck {
         let truck = new Truck();
         let pendingNodes = this.routes.slice();
 
-        let origin = pendingNodes.unshift();
+        let origin = pendingNodes.shift();
         truck.setOrigin(origin);
 
         pendingNodes.forEach(function (element, index) {
@@ -97,6 +97,7 @@ export class Truck {
         let actualPosition = this.getActualPosition();
 
         this.routes.push(destination);
+        console.log(actualPosition);
         this.currentTime += actualPosition.timeTo(destination);
 
         this.updateLoad(destination);

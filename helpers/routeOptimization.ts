@@ -1,7 +1,7 @@
 
 export class Optimization{
 
-   repositionNodes(truck, disposals){
+   static repositionNodes(truck, disposals){
       let containers = truck.routes.slice();
       let bestTruck = truck.copy();
 
@@ -11,7 +11,7 @@ export class Optimization{
 
 
       containers.forEach(function (container) {
-         let neighbourhood = this.getNeighbourhood(container, containers);
+         let neighbourhood = Optimization.getNeighbourhood(container, containers);
 
          neighbourhood.forEach(function (neighbour) {
             let candidate = bestTruck.copy();
@@ -23,17 +23,18 @@ export class Optimization{
          })
       });
 
+      return bestTruck;
 
    }
    // TODO de momento es cutre, habría que devolver solo los más cercanos
-   getNeighbourhood(container, containers){
+   static getNeighbourhood(container, containers){
 
       let all = containers.slice();
-      return this.removeFrom(all, container);
+      return Optimization.removeFrom(all, container);
    }
 
 
-   removeFrom(containers, container){
+   private static removeFrom(containers, container){
       let index = containers.indexOf(container);
       containers.splice(index, 1);
       return containers;
