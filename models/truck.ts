@@ -43,6 +43,7 @@ export class Truck {
     }
 
     isBetterThan(anotherTruck){
+        console.log(this.currentTime + " contra "+ anotherTruck.currentTime);
         return this.currentTime < anotherTruck.currentTime;
     }
 
@@ -77,6 +78,10 @@ export class Truck {
         return true;
     }
 
+    haveNode(node){
+        return this.routes.indexOf(node) != -1;
+    }
+
     moveAfter(container1, container2){
         this.removeFromRoutes(container1);
         let index2 = this.routes.indexOf(container2);
@@ -97,7 +102,6 @@ export class Truck {
         let actualPosition = this.getActualPosition();
 
         this.routes.push(destination);
-        console.log(actualPosition);
         this.currentTime += actualPosition.timeTo(destination);
 
         this.updateLoad(destination);
@@ -153,6 +157,7 @@ export class Truck {
 
     copy(){
         let truck = new Truck();
+        truck.currentTime = this.currentTime;
         truck.routes = this.routes.slice();
 
         return truck;

@@ -21,7 +21,7 @@ app.use(function(req, res, next) {
 
 // DATABASE SETUP ------
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/test');
+mongoose.connect('mongodb://mongo/test');
 
 
 app.listen(3000, function(){

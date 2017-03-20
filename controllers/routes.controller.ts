@@ -1,5 +1,5 @@
 import {Routing} from "../helpers/routeCalculator";
-import {Optimization} from "../helpers/routeOptimization";
+import {LocalOptimization} from "../optimization/local.optimization";
 const router = require('express').Router();
 const GraphNode = require('../models/GraphNode');
 const Route = require('../models/Route');
@@ -23,11 +23,12 @@ router.get('/', function (req, res) {
 
 router.get('/generate', function (req, res) {
 
-    let disposals;
+    var localOptimization : LocalOptimization;
 
     Routing.getDisposals()
-        .then(function (disposalsList) {
-            disposals = disposalsList;
+        .then(function (disposals) {
+            localOptimization = new LocalOptimization(disposals);
+
             return Route.remove({});
         })
         .then(function () {
@@ -36,15 +37,10 @@ router.get('/generate', function (req, res) {
         .then(function (containers) {
             return Routing.generateInitialSolution(containers);
         })
-        /*.then(function (trucks) {
-            let optimizedTrucks = [];
+        .then(function(trucks){
+            return localOptimization.optimize(trucks);
+        })
 
-            trucks.forEach(function(truck){
-                optimizedTrucks.push(Optimization.repositionNodes(truck, disposals));
-            });
-
-            return optimizedTrucks;
-        })*/
         .then(function (trucks) {
             trucks.forEach(function (truck) {
                 truck.saveRoute();
