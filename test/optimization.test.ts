@@ -1,6 +1,5 @@
 import {Truck} from "../models/truck";
 import { expect } from 'chai';
-import {Routing} from "../helpers/routeCalculator";
 
 const GraphNode = require('../models/GraphNode');
 
@@ -24,9 +23,25 @@ describe("Funciones de la clase Truck", function() {
     });
   });
 
-  describe("Validar una ruta", function() {
-    it("valida una ruta que ya de por si debería de ser válida", function() {
+  describe("Reemplaza un nodo con otro", function() {
+    it("Reemplaza el nodo indicado por otro", function() {
 
+      let truck = new Truck();
+
+      let node0 = {name: "node 0"};
+      let node1 = {name: "node 1"};
+      let node2 = {name: "node 2"};
+      let node3 = {name: "node 3"};
+      let node4 = {name: "node 4"};
+      let node5 = {name: "node 5"};
+
+      let nodes = [node0, node1, node2, node3, node4, node5];
+
+      let newNode = {name: "new node"};
+
+      truck.routes = nodes;
+      truck.replace(node4, newNode);
+      expect(truck.routes).to.deep.equal([node0, node1, node2, node3, newNode, node5])
     });
   });
 });

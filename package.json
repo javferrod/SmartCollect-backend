@@ -12,6 +12,7 @@
   "author": "Javier Fernández Rodríguez",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "body-parser": "^1.16.1",
     "chai": "^3.5.0",
     "express": "^4.15.2",

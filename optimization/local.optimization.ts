@@ -5,7 +5,7 @@ export class LocalOptimization{
    disposals: any[];
 
    constructor(disposals){
-     this.disposals = disposals;
+     this.disposals = disposals.slice();
    }
 
    optimize(trucks){
@@ -40,6 +40,7 @@ export class LocalOptimization{
          }.bind(this))
       }.bind(this));
 
+      console.log("[Truck] Tiempo despues de fase I: "+bestTruck.currentTime);
       return bestTruck;
 
    }

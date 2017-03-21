@@ -1,10 +1,8 @@
-import {Routing} from "../helpers/routeCalculator";
-import {cursorTo} from "readline";
 const GraphNode = require('./GraphNode');
 const Route = require('./Route');
 
 const CAPACITY_THRESHOLD = 0.8;
-const MAX_WORK_TIME = 10*60 * 60;
+const MAX_WORK_TIME = 1000;
 
 export class Truck {
     currentTime: number;
@@ -43,7 +41,6 @@ export class Truck {
     }
 
     isBetterThan(anotherTruck){
-        console.log(this.currentTime + " contra "+ anotherTruck.currentTime);
         return this.currentTime < anotherTruck.currentTime;
     }
 
@@ -79,10 +76,22 @@ export class Truck {
     }
 
     haveNode(node){
+        this.routes.forEach(function (r) {
+            console.log(r._id)
+        });
+        console.log("---");
+        console.log(node._id);
+        console.log("---");
         return this.routes.indexOf(node) != -1;
     }
 
+    replace(oldNode, newNode){
+        let index = this.routes.indexOf(oldNode);
+        this.routes[index] = newNode;
+    }
+
     moveAfter(container1, container2){
+        //TODO alterar order
         this.removeFromRoutes(container1);
         let index2 = this.routes.indexOf(container2);
 

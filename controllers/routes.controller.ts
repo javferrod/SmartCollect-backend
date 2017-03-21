@@ -1,8 +1,10 @@
-import {Routing} from "../helpers/routeCalculator";
+import {InitialSolver} from "../helpers/initialSolver";
 import {LocalOptimization} from "../optimization/local.optimization";
+import {InterRouteOptimization} from "../optimization/interRoute.optimization";
 const router = require('express').Router();
 const GraphNode = require('../models/GraphNode');
 const Route = require('../models/Route');
+const Promise = require('bluebird');
 
 router.get('/', function (req, res) {
 
@@ -23,9 +25,61 @@ router.get('/', function (req, res) {
 
 router.get('/generate', function (req, res) {
 
-    var localOptimization : LocalOptimization;
+    let containers, disposals, depot;
 
-    Routing.getDisposals()
+    let initialSolver: InitialSolver;
+    let localOptimization : LocalOptimization;
+    let interRouteOptimization : InterRouteOptimization;
+
+    Route.remove({}).then(function () {
+
+        Promise.all([getContainers(), getDisposals(), getDepot()])
+            .then(function (nodes) {
+                containers = nodes[0];
+                disposals = nodes[1];
+                depot = nodes[2];
+
+
+                initialSolver = new InitialSolver(containers, disposals, depot);
+                localOptimization = new LocalOptimization(disposals);
+                interRouteOptimization = new InterRouteOptimization(containers, disposals)
+            })
+            .then( () => initialSolver.generateInitialSolution() )
+            .then( (trucks) => localOptimization.optimize(trucks) )
+            .then( (trucks) => interRouteOptimization.optimize(trucks) )
+            .then(function (trucks) {
+
+                trucks.forEach(function (truck) {
+
+                    truck.saveRoute();
+                });
+                res.json(trucks);
+    });
+
+})
+
+
+    /*
+
+    getContainers()
+        .then(function (containersList) {
+            containers = containersList;
+            return getDisposals();
+        })
+        .then(function (disposalsList) {
+            disposals = disposalsList;
+            return getDepot();
+        })
+        .then(function (depotObject) {
+            depot = depotObject;
+
+            initialSolver = new InitialSolver(containers, disposals, depot);
+            localOptimization = new LocalOptimization(disposals);
+            interRouteOptimization = new InterRouteOptimization();
+        })
+        .then(initialSolver.generateInitialSolution)
+
+    getDisposals()
         .then(function (disposals) {
             localOptimization = new LocalOptimization(disposals);
 
@@ -35,7 +89,6 @@ router.get('/generate', function (req, res) {
             return GraphNode.find({type: 'container'});
         })
         .then(function (containers) {
-            return Routing.generateInitialSolution(containers);
         })
         .then(function(trucks){
             return localOptimization.optimize(trucks);
@@ -46,9 +99,19 @@ router.get('/generate', function (req, res) {
                 truck.saveRoute();
             });
             res.json(trucks);
-        });
+        });*/
 });
 
+function getDepot() {
+    return GraphNode.findOne({type: 'depot'});
+}
 
+function getDisposals(){
+    return GraphNode.find({type: 'disposal'});
+}
 
+function getContainers(){
+    return GraphNode.find({type: 'container'});
+}
 module.exports = router;
+

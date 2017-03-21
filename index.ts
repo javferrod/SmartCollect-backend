@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
-
+const Promise = require('bluebird');
 const app = express();
 
 //STATIC FILES ------
@@ -20,8 +20,8 @@ app.use(function(req, res, next) {
 });
 
 // DATABASE SETUP ------
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://mongo/test');
+mongoose.Promise = Promise;
+mongoose.connect('mongodb://localhost/test');
 
 
 app.listen(3000, function(){
