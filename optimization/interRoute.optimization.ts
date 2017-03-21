@@ -24,7 +24,9 @@ export class InterRouteOptimization {
             neighbourhood.forEach(function (container2) {
                let truck2 = this.getAssignedTruck(container2);
 
-               this.swapIfBetter(truck1, truck2, container1, container2);
+               if(truck2 !== truck1){
+                   this.swapIfBetter(truck1, truck2, container1, container2);
+               }
 
             }.bind(this))
 
@@ -50,6 +52,7 @@ export class InterRouteOptimization {
             return;
 
         if(this.copiesBetterThanOriginals(truck1, truck2, truck1Copy, truck2Copy)){
+            console.log("MEJORES");
             this.replaceTruck(truck1, truck1Copy);
             this.replaceTruck(truck2, truck2Copy);
         }
@@ -69,11 +72,14 @@ export class InterRouteOptimization {
         return copyTime < originalTime;
     }
 
-    private getAssignedTruck(container): Truck{
-        this.trucks.forEach(function (truck) {
-            if(truck.haveNode(container))
-                return truck;
-        });
+    private getAssignedTruck(container): Truck {
+
+        for(let i = 0; i < this.trucks.length; i++){
+
+            if(this.trucks[i].haveNode(container))
+                return this.trucks[i];
+        }
+
         return null;
     }
 

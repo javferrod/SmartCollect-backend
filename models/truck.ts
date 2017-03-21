@@ -2,7 +2,7 @@ const GraphNode = require('./GraphNode');
 const Route = require('./Route');
 
 const CAPACITY_THRESHOLD = 0.8;
-const MAX_WORK_TIME = 1000;
+const MAX_WORK_TIME = 1500;
 
 export class Truck {
     currentTime: number;
@@ -82,7 +82,9 @@ export class Truck {
         console.log("---");
         console.log(node._id);
         console.log("---");
-        return this.routes.indexOf(node) != -1;
+       let index = this.indexOfRoute(node);
+        console.log(index);
+        return this.indexOfRoute(node) != -1;
     }
 
     replace(oldNode, newNode){
@@ -186,6 +188,16 @@ export class Truck {
 
     private getActualPosition(){
         return this.routes[this.routes.length - 1];
+    }
+
+    private indexOfRoute(node){
+
+        for(let i = 0; i < this.routes.length; i++){
+            if(this.routes[i]._id.equals(node._id))
+                return i;
+        }
+
+        return -1;
     }
 }
 

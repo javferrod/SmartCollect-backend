@@ -18,9 +18,12 @@ export class InitialSolver {
         let trucks = [];
 
         while(this.containers.length > 0){
+            console.log(this.containers.length);
             let truck = this.generateOneRoute();
             trucks.push(truck);
             console.log("[Truck] Tiempo antes de optimizar: "+truck.currentTime)
+            console.log(this.containers.length);
+            console.log(truck.routes.length);
         }
         return trucks;
     }
@@ -102,6 +105,8 @@ export class InitialSolver {
 
     private removeFromContainersList(itemToRemove){
         let index = this.containers.indexOf(itemToRemove);
-        this.containers.splice(index, 1);
+
+        if(index !== -1)
+            this.containers.splice(index, 1);
     }
 }

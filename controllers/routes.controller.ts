@@ -46,7 +46,7 @@ router.get('/generate', function (req, res) {
             })
             .then( () => initialSolver.generateInitialSolution() )
             .then( (trucks) => localOptimization.optimize(trucks) )
-            .then( (trucks) => interRouteOptimization.optimize(trucks) )
+            //.then( (trucks) => interRouteOptimization.optimize(trucks) )
             .then(function (trucks) {
 
                 trucks.forEach(function (truck) {
