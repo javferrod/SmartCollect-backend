@@ -1,5 +1,6 @@
 //TODO: En progreso
 import {Truck} from "../models/truck";
+import {RouteContext} from "../optimization/routesContext";
 
 export class InitialSolver {
 
@@ -7,28 +8,38 @@ export class InitialSolver {
     disposals: any[];
     depot: any;
 
-    constructor(containers, disposals, depot){
-        this.containers = containers.slice();
-        this.disposals = disposals.slice();
+    static generateInitialSolution(routeContext: RouteContext){
+        let containers = routeContext.getContainers();
+        let disposals = routeContext.getDisposals();
+        let depot = routeContext.getDepot();
+
+        let initialSolver = new InitialSolver(containers, disposals, depot);
+
+        let trucks = initialSolver.generateInitialSolution();
+        routeContext.setTrucks(trucks);
+
+        return routeContext;
+    }
+
+    private constructor(containers, disposals, depot){
+        this.containers = containers;
+        this.disposals = disposals;
         this.depot = depot;
     }
 
-    generateInitialSolution() {
+    private generateInitialSolution() {
 
         let trucks = [];
 
         while(this.containers.length > 0){
-            console.log(this.containers.length);
             let truck = this.generateOneRoute();
             trucks.push(truck);
-            console.log("[Truck] Tiempo antes de optimizar: "+truck.currentTime)
-            console.log(this.containers.length);
-            console.log(truck.routes.length);
+            console.log("[Truck] Tiempo antes de optimizar: "+truck.currentTime);
         }
         return trucks;
     }
 
-    generateOneRoute(){
+    private generateOneRoute(){
 
         let truck = new Truck(); //init truck
 

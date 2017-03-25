@@ -1,47 +1,80 @@
-import {Truck} from "../models/truck";
 import { expect } from 'chai';
+import {RouteContext} from "../optimization/routesContext";
+import {InitialSolver} from "../helpers/initialSolver";
+import {LocalOptimization} from "../optimization/local.optimization";
+import {InterRouteOptimization} from "../optimization/interRoute.optimization";
 
+const Promise = require('bluebird');
 const GraphNode = require('../models/GraphNode');
 
-describe("Funciones de la clase Truck", function() {
-  describe("Insertar un nodo despues de otro", function() {
-    it("inserta un nodo despues de otro existente en la ruta", function() {
-      let truck = new Truck();
+const mongoose = require('mongoose');
+mongoose.Promise = Promise;
+mongoose.connect('mongodb://localhost/test');
 
-      let node0 = {name: "node 0"};
-      let node1 = {name: "node 1"};
-      let node2 = {name: "node 2"};
-      let node3 = {name: "node 3"};
-      let node4 = {name: "node 4"};
-      let node5 = {name: "node 5"};
+describe("Funciones de optimización y de generación de rutas", function() {
 
-      let nodes = [node0, node1, node2, node3, node4, node5];
+  describe("Realiza la solución inicial de las rutas", function () {
+    it("Genera la solución inicial, que es válida si contiene rutas que pasan por todos los contenedores solo una vez", function () {
 
-      truck.routes = nodes;
-      truck.moveAfter(node0, node4);
-      expect(truck.routes).to.deep.equal([node1, node2, node3, node4, node0, node5])
+
+      return Promise.all([getContainers(), getDisposals(), getDepot()])
+          .then(RouteContext.makeNew)
+          .then(InitialSolver.generateInitialSolution)
+          .then(checkIfAllContainersAreInRoute);
+
     });
   });
+  describe("Realiza la optimización local de las rutas", function () {
+    it(" Optimiza las rutas iniciales de manera local, que es válida si contiene rutas que pasan por todos los contenedores solo una vez", function () {
 
-  describe("Reemplaza un nodo con otro", function() {
-    it("Reemplaza el nodo indicado por otro", function() {
 
-      let truck = new Truck();
+      return Promise.all([getContainers(), getDisposals(), getDepot()])
+          .then(RouteContext.makeNew)
+          .then(InitialSolver.generateInitialSolution)
+          .then(LocalOptimization.optimize)
+          .then(checkIfAllContainersAreInRoute);
 
-      let node0 = {name: "node 0"};
-      let node1 = {name: "node 1"};
-      let node2 = {name: "node 2"};
-      let node3 = {name: "node 3"};
-      let node4 = {name: "node 4"};
-      let node5 = {name: "node 5"};
-
-      let nodes = [node0, node1, node2, node3, node4, node5];
-
-      let newNode = {name: "new node"};
-
-      truck.routes = nodes;
-      truck.replace(node4, newNode);
-      expect(truck.routes).to.deep.equal([node0, node1, node2, node3, newNode, node5])
     });
   });
+  describe("Realiza la optimización inter ruta de las rutas", function () {
+    it(" Optimiza las rutas intercambiando nodos entre rutas, que es válida si contiene rutas que pasan por todos los contenedores solo una vez", function () {
+
+
+      return Promise.all([getContainers(), getDisposals(), getDepot()])
+          .then(RouteContext.makeNew)
+          .then(InitialSolver.generateInitialSolution)
+          .then(LocalOptimization.optimize)
+          .then(InterRouteOptimization.optimize)
+          .then(checkIfAllContainersAreInRoute);
+    });
+  })
 });
+
+function checkIfAllContainersAreInRoute(routeContext){
+  let allContainersInRoute = [];
+  let allContainers = routeContext.getContainers();
+
+  routeContext.getTrucks().forEach(function(truck){
+
+    let containers = truck.routes.filter(function (node) {
+      return node.type == 'container';
+    });
+    allContainersInRoute = allContainersInRoute.concat(containers);
+
+  });
+  expect(allContainersInRoute).to.have.lengthOf(allContainers.length).and.have.members(allContainers);
+}
+
+// DATABASE HELPERS
+
+function getDepot() {
+  return GraphNode.findOne({type: 'depot'});
+}
+
+function getDisposals(){
+  return GraphNode.find({type: 'disposal'});
+}
+
+function getContainers(){
+  return GraphNode.find({type: 'container'});
+}

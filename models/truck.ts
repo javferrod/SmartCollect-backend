@@ -27,7 +27,11 @@ export class Truck {
 
     saveRoute(){
 
-        let route = new Route({nodes: []});
+        let route = new Route(
+            {
+                time: this.currentTime,
+                nodes: []
+            });
 
         this.routes.forEach(function (node, index) {
             route.nodes.push({
@@ -53,7 +57,6 @@ export class Truck {
         truck.setOrigin(origin);
 
         pendingNodes.forEach(function (element, index) {
-
             if(!truck.isCollectible(element)){
                 let nearestDisposal = truck.getNearestDisposal(disposals);
                 truck.attachDestination(nearestDisposal);
@@ -76,14 +79,6 @@ export class Truck {
     }
 
     haveNode(node){
-        this.routes.forEach(function (r) {
-            console.log(r._id)
-        });
-        console.log("---");
-        console.log(node._id);
-        console.log("---");
-       let index = this.indexOfRoute(node);
-        console.log(index);
         return this.indexOfRoute(node) != -1;
     }
 

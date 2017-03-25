@@ -1,6 +1,7 @@
 import {InitialSolver} from "../helpers/initialSolver";
 import {LocalOptimization} from "../optimization/local.optimization";
 import {InterRouteOptimization} from "../optimization/interRoute.optimization";
+import {RouteContext} from "../optimization/routesContext";
 const router = require('express').Router();
 const GraphNode = require('../models/GraphNode');
 const Route = require('../models/Route');
@@ -25,38 +26,21 @@ router.get('/', function (req, res) {
 
 router.get('/generate', function (req, res) {
 
-    let containers, disposals, depot;
-
-    let initialSolver: InitialSolver;
-    let localOptimization : LocalOptimization;
-    let interRouteOptimization : InterRouteOptimization;
-
     Route.remove({}).then(function () {
 
         Promise.all([getContainers(), getDisposals(), getDepot()])
-            .then(function (nodes) {
-                containers = nodes[0];
-                disposals = nodes[1];
-                depot = nodes[2];
-
-
-                initialSolver = new InitialSolver(containers, disposals, depot);
-                localOptimization = new LocalOptimization(disposals);
-                interRouteOptimization = new InterRouteOptimization(containers, disposals)
-            })
-            .then( () => initialSolver.generateInitialSolution() )
-            .then( (trucks) => localOptimization.optimize(trucks) )
-            //.then( (trucks) => interRouteOptimization.optimize(trucks) )
-            .then(function (trucks) {
-
-                trucks.forEach(function (truck) {
-
+            .then(RouteContext.makeNew)
+            .then(InitialSolver.generateInitialSolution)
+            .then(LocalOptimization.optimize)
+            .then(InterRouteOptimization.optimize)
+            .then(function (routeContext) {
+                routeContext.getTrucks().forEach(function (truck) {
                     truck.saveRoute();
                 });
-                res.json(trucks);
+                res.json(routeContext.getTrucks());
     });
 
-})
+});
 
 
     /*

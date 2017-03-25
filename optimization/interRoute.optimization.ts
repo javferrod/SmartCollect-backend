@@ -1,28 +1,41 @@
 import {Truck} from "../models/truck";
+import {RouteContext} from "./routesContext";
 
 
 export class InterRouteOptimization {
 
     containers: any[];
     disposals: any[];
+
     trucks: Truck[];
 
-    constructor(containers, disposals){
-        this.containers = containers.slice();
+    static optimize(routeContext: RouteContext){
+        let containers = routeContext.getContainers();
+        let disposals = routeContext.getDisposals();
+
+        let optimizer = new InterRouteOptimization(containers, disposals);
+
+        let trucks = optimizer.optimize(routeContext.getTrucks());
+
+        routeContext.setTrucks(trucks);
+
+        return routeContext;
+    }
+
+    private constructor(containers, disposals){
+        this.containers = containers;
         this.disposals = disposals;
     }
 
-    optimize(trucks){
+    private optimize(trucks){
+        this.trucks = trucks;
 
-        this.trucks = trucks.slice();
-        console.log(this.containers);
         this.containers.forEach(function(container1){
             let neighbourhood = InterRouteOptimization.getNeighbourhood(container1, this.containers);
 
-            let truck1 = this.getAssignedTruck(container1);
-
             neighbourhood.forEach(function (container2) {
-               let truck2 = this.getAssignedTruck(container2);
+                let truck1 = this.getAssignedTruck(container1);
+                let truck2 = this.getAssignedTruck(container2);
 
                if(truck2 !== truck1){
                    this.swapIfBetter(truck1, truck2, container1, container2);
@@ -40,19 +53,17 @@ export class InterRouteOptimization {
         return this.trucks;
     }
 
-    private swapIfBetter(truck1, truck2, container1, container2){
+    private swapIfBetter(truck1, truck2, container1, container2) {
         let truck1Copy = truck1.copy();
         let truck2Copy = truck2.copy();
 
         this.swapContainers(truck1Copy, truck2Copy, container1, container2);
-
-        if(! truck1Copy.isFeasible(this.disposals))
+        if (!truck1Copy.isFeasible(this.disposals))
             return;
-        if(! truck2Copy.isFeasible(this.disposals))
+        if (!truck2Copy.isFeasible(this.disposals))
             return;
 
-        if(this.copiesBetterThanOriginals(truck1, truck2, truck1Copy, truck2Copy)){
-            console.log("MEJORES");
+        if (this.copiesBetterThanOriginals(truck1, truck2, truck1Copy, truck2Copy)) {
             this.replaceTruck(truck1, truck1Copy);
             this.replaceTruck(truck2, truck2Copy);
         }

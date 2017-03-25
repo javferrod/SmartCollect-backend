@@ -1,14 +1,26 @@
+import {RouteContext} from "./routesContext";
 const GraphNode = require('../models/GraphNode');
 
 export class LocalOptimization{
 
    disposals: any[];
 
-   constructor(disposals){
+   static optimize(routeContext: RouteContext): RouteContext{
+      let disposals = routeContext.getDisposals();
+
+      let optimizer = new LocalOptimization(disposals);
+      let trucks = optimizer.optimize(routeContext.getTrucks());
+
+      routeContext.setTrucks(trucks);
+
+      return routeContext;
+   }
+
+   private constructor(disposals){
      this.disposals = disposals.slice();
    }
 
-   optimize(trucks){
+   private optimize(trucks){
      return trucks.map(function (truck) {
         return this.repositionNodes(truck);
      }.bind(this))

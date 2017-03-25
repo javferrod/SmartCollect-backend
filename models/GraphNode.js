@@ -36,9 +36,6 @@ const GraphNodeSchema = new Schema({
 GraphNodeSchema.methods.timeTo = function (destination) {
 
     var route = this.routes.find(function(address){
-        if(address === undefined)
-            console.log(container);
-
         return address._container.equals(destination._id);
     });
 
