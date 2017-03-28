@@ -6,6 +6,7 @@ const path = require('path');
 const Promise = require('bluebird');
 const app = express();
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 
 
@@ -84,6 +85,8 @@ function setUpProductionServer(app){
         cert: fs.readFileSync('./ssl/fullchain.pem'),
         key: fs.readFileSync('./ssl/privkey.pem')
     }, app).listen(443);
+
+    http.createServer(app).listen(80);
 
     mongoose.connect('mongodb://mongo/test');
 }
