@@ -21,6 +21,9 @@ const GraphNodeSchema = new Schema({
         timestamp: Date,
         filling: Number
     }],
+    reports: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Report' }
+    ],
     routes: [
         {
             _id: false,

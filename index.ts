@@ -5,6 +5,18 @@ const mongoose = require('mongoose');
 const path = require('path');
 const Promise = require('bluebird');
 const app = express();
+const https = require('https');
+const fs = require('fs');
+
+
+// DATABASE SETUP ------
+mongoose.Promise = Promise;
+
+
+if(process.env.ENV === 'production')
+    setUpProductionServer(app);
+else
+    setUpDevelopServer(app);
 
 //STATIC FILES ------
 app.use(express.static('app'));
@@ -12,21 +24,6 @@ app.use(express.static('app'));
 // BODY PARSER SETUP ------
 app.use(bodyParser.json());
 
-// ENABLING CORS
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
-// DATABASE SETUP ------
-mongoose.Promise = Promise;
-mongoose.connect('mongodb://localhost/test');
-
-
-app.listen(3000, function(){
-	console.log('Listening on 3000');
-});
 
 // ANGULAR ---
 
@@ -50,6 +47,10 @@ app.use('/route', require('./controllers/routes.controller'));
 
 app.use('/disposal', require('./controllers/disposals.controller'));
 
+// REPORTS ---
+
+app.use('/report', require('./controllers/reports.controller'));
+
 // HACKS ---
 
 app.get('/fake_disposal', function (req, res) {
@@ -62,3 +63,27 @@ app.get('/depot', function (req, res) {
 
 // HELPERS ---
 
+function setUpDevelopServer(app){
+
+// ENABLING CORS
+    app.use(function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+
+
+    app.listen(3000, function(){
+        console.log('Develop server listening on 3000');
+    });
+    mongoose.connect('mongodb://localhost/test');
+}
+
+function setUpProductionServer(app){
+    https.createServer({
+        cert: fs.readFileSync('./ssl/fullchain.pem'),
+        key: fs.readFileSync('./ssl/privkey.pem')
+    }, app).listen(443);
+
+    mongoose.connect('mongodb://mongo/test');
+}

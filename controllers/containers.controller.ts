@@ -4,9 +4,11 @@ const GraphNode = require('../models/GraphNode');
 const guid = require('../helpers/guid-generator');
 
 router.get('/', function (req, res) {
-    GraphNode.find({type: 'container'}).then(function (containers) {
-        res.json(containers);
-    }).catch(function (error) {
+    GraphNode.find({type: 'container'})
+        .populate('reports')
+        .then(function (containers) {
+            res.json(containers);
+        }).catch(function (error) {
         console.error(error)
     })
 
@@ -45,6 +47,7 @@ router.get('/:container_id', function (req, res) {
     let containerId = req.params.container_id;
 
     GraphNode.findOne({id: containerId})
+        .populate('reports')
         .then(function (container) {
             res.json(container);
         })
