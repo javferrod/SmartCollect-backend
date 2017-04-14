@@ -3,11 +3,12 @@ const distanceCalculator = require('./distanceCalculator');
 
 export class Graph{
 
-    static insertNode(id, lat, lng, token, type){
+    static insertNode(id, lat, lng, token, type, containerTypeId){
         let newNode = new GraphNode({
             id: id,
             token: token,
             type: type,
+            containerType: containerTypeId,
             address: {
                 lat: lat,
                 long: lng

@@ -2,6 +2,7 @@ SAMPLES_PER_CONECTION = 24;
 
 const mongoose = require('mongoose');
 const dateHelper = require('../helpers/dates');
+const moment = require('moment');
 
 const Schema = mongoose.Schema;
 
@@ -10,6 +11,7 @@ const GraphNodeSchema = new Schema({
     token: String,
     last_seen: Date,
     type: String,
+    containerType: { type: mongoose.Schema.Types.ObjectId, ref: 'ContainerType' },
     address: {
         _id: false,
         lat: Number,
@@ -50,17 +52,21 @@ GraphNodeSchema.methods.getLatLng = function(){
 };
 
 GraphNodeSchema.methods.processMeasures = function(measures){
-    var today = new Date();
+
+    var heigth = this.containerType.height;
+
+    for(var index=0; index < measures.length; index++){
+        var today = moment();
+        var measure = (measures[index] / heigth) * 100;
+        var hoursSinceMeasure = measures.length - index - 1;
+
+        console.log(measure+" | "+hoursSinceMeasure);
+        var timestamp = today.subtract(hoursSinceMeasure, 'hours');
+
+        this.appendMeasure(measure, timestamp.toDate());
+    }
     this.last_seen = today;
-
-    measures.forEach(function(measure){
-        var hoursSinceMeasure = SAMPLES_PER_CONECTION - measure.index;
-        var timestamp = dateHelper.substractHours(today, hoursSinceMeasure);
-
-        this.appendMeasure(measure.filling, timestamp);
-    }.bind(this));
 };
-
 
 GraphNodeSchema.methods.appendMeasure = function(filling, timestamp) {
 

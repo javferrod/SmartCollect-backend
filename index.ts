@@ -34,32 +34,38 @@ app.get('/', function(req, res){
 
 // CONTAINERS ---
 
-app.use('/container', require('./controllers/containers.controller'));
+app.use('/api/container', require('./controllers/containers.controller'));
 
 // NODES ---
 
-app.use('/node', require('./controllers/nodes.controller'));
+app.use('/api/node', require('./controllers/nodes.controller'));
 
 // ROUTES ---
 
-app.use('/route', require('./controllers/routes.controller'));
+app.use('/api/route', require('./controllers/routes.controller'));
 
 // DISPOSAL ---
 
-app.use('/disposal', require('./controllers/disposals.controller'));
+app.use('/api/disposal', require('./controllers/disposals.controller'));
 
 // REPORTS ---
 
-app.use('/report', require('./controllers/reports.controller'));
+app.use('/api/report', require('./controllers/reports.controller'));
 
 // HACKS ---
 
-app.get('/fake_disposal', function (req, res) {
+app.get('/api/fake_disposal', function (req, res) {
     Graph.insertNode(666, 42.229021, -8.719507, 11, 'disposal');
 });
 
-app.get('/depot', function (req, res) {
+app.get('/api/depot', function (req, res) {
     Graph.insertNode(666,42.231627 ,-8.720580, 11, 'depot');
+});
+
+// 404 catch
+app.all('*', (req: any, res: any) => {
+    console.log(`[TRACE] Server 404 request: ${req.originalUrl}`);
+    res.sendFile(path.join(__dirname + '/app/index.html'));
 });
 
 // HELPERS ---

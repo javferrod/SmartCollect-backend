@@ -4,7 +4,7 @@ var datesHelper = {
         return diff / (1000 * 60 * 60 * 24);
     },
     substractHours: function(date, hours){
-        return date.setHours(date.getHours(), hours);
+        return date.setHours(date.getHours() - hours);
     }
 };
 

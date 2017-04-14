@@ -1,11 +1,13 @@
 import {Graph} from "../helpers/graph";
 const router = require('express').Router();
 const GraphNode = require('../models/GraphNode');
+const ContainerType = require('../models/ContainerType');
 const guid = require('../helpers/guid-generator');
 
 router.get('/', function (req, res) {
     GraphNode.find({type: 'container'})
         .populate('reports')
+        .populate('containerType')
         .then(function (containers) {
             res.json(containers);
         }).catch(function (error) {
@@ -14,11 +16,12 @@ router.get('/', function (req, res) {
 
 });
 
+
 router.post('/', function (req, res) {
     let data = req.body;
     let token = guid.generate();
 
-    Graph.insertNode(data.id, data.lat, data.long, token, 'container')
+    Graph.insertNode(data.id, data.lat, data.long, token, 'container', data.type_id)
         .then(function () {
             res.json({token: token});
         });
@@ -55,6 +58,33 @@ router.get('/:container_id', function (req, res) {
             console.error(error);
             res.sendStatus(404);
         })
+});
+
+router.get('/types/all/', function (req, res) {
+    ContainerType.find()
+        .then(function (containerTypes) {
+            console.log(containerTypes);
+            res.json(containerTypes);
+        })
+        .catch(function (error) {
+            console.error(error);
+            res.sendStatus(404);
+        })
+});
+
+router.post('/types/', function (req, res) {
+    let data = req.body;
+    let type = new ContainerType();
+
+    type.name = data['name'];
+    type.height = data['height'];
+    type.width = data['width'];
+    type.capacity = data['capacity'];
+
+    type.save()
+        .then(function () {
+            res.sendStatus(200);
+        });
 });
 
 module.exports = router;
